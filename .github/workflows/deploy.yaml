@@ -1,4 +1,4 @@
-name: Deploy to EKS
+name: Deploy to EKS Cluster
 
 on:
   push:
@@ -13,16 +13,61 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v1
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
         with:
-          version: 'latest'
+          terraform_version: 1.0.0
 
-      - name: Install Helm
-        uses: azure/setup-helm@v1
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          version: 'latest'
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
 
-      - name: Deploy with Helm
+      - name: Fetch EKS cluster details
         run: |
-          helm upgrade --install hello-go-app ./charts --namespace hello-go-namespace
+          
+          terraform init
+          terraform plan
+          terraform apply --auto-approve
+          terraform output -json > eks_output.json
+
+      - name: Setup kubectl
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            sudo az aks install-cli
+            cat ../terraform/eks_output.json | jq -r '.eks_cluster.value' > eks_cluster.txt
+            cat ../terraform/eks_output.json | jq -r '.region.value' > eks_region.txt
+            export KUBECONFIG=~/.kube/config
+            aws eks --region $(cat eks_region.txt) update-kubeconfig --name $(cat eks_cluster.txt)
+
+      - name: Deploy application
+        run: |
+          echo "
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: my-app
+            namespace: my-namespace
+          spec:
+            replicas: 3
+            selector:
+              matchLabels:
+                app: my-app
+            template:
+              metadata:
+                labels:
+                  app: my-app
+              spec:
+                containers:
+                - name: my-app
+                  image: vdr007/hello-go-app
+                  ports:
+                  - containerPort: 8080
+          " | kubectl apply -f -
+
+      - name: Wait for deployment rollout
+        run: |
+          kubectl rollout status deployment/my-app --namespace my-namespace
