@@ -27,7 +27,7 @@ jobs:
 
       - name: Fetch EKS cluster details
         run: |
-          cd terraform
+          
           terraform init
           terraform output -json > eks_output.json
 
