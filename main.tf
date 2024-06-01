@@ -98,7 +98,7 @@ resource "aws_eks_node_group" "my_node_group" {
     max_size     = 3
     min_size     = 1
   }
- 
+ subnet_ids = ["subnet-01b32a3aaa42658c3", "subnet-06b9233cf6cb96132"]
 }
 
 
