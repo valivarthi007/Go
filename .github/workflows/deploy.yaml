@@ -29,6 +29,8 @@ jobs:
         run: |
           
           terraform init
+          terraform plan
+          terraform apply --auto-approve
           terraform output -json > eks_output.json
 
       - name: Setup kubectl
