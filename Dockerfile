@@ -3,6 +3,9 @@ FROM golang:1.16-alpine AS builder
 
 WORKDIR /app
 
+# Initialize Go module
+RUN go mod init myapp
+
 COPY . .
 
 # Build the Go application
