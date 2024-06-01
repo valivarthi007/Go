@@ -1,0 +1,28 @@
+name: Deploy to EKS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v1
+        with:
+          version: 'latest'
+
+      - name: Install Helm
+        uses: azure/setup-helm@v1
+        with:
+          version: 'latest'
+
+      - name: Deploy with Helm
+        run: |
+          helm upgrade --install hello-go-app ./charts --namespace hello-go-namespace
