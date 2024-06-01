@@ -79,7 +79,7 @@ resource "aws_security_group" "eks_cluster_sg" {
 resource "aws_eks_cluster" "my_cluster" {
   name        = "my-cluster"
   role_arn    = aws_iam_role.eks_cluster_role.arn
-  version     = "1.21"
+  version     = "1.29"
   
   vpc_config {
     subnet_ids         = ["subnet-01b32a3aaa42658c3", "subnet-06b9233cf6cb96132"]  # Replace with your subnet IDs
