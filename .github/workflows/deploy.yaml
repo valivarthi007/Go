@@ -27,7 +27,6 @@ jobs:
 
       - name: Fetch EKS cluster details
         run: |
-          terraform destroy
           terraform init
           terraform plan
           terraform apply --auto-approve
