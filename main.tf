@@ -3,55 +3,22 @@ provider "aws" {
   region = "us-east-1"  
 }
 # Create IAM role for EKS cluster
-# Update IAM role for EKS cluster
-resource "aws_iam_role" "eks_cluster_role" {
-  name               = "eks-cluster-role"
+resource "aws_iam_role" "eks_node_role" {
+  name               = "eks-node-role"
   assume_role_policy = jsonencode({
     "Version": "2012-10-17",
     "Statement": [
       {
         "Effect": "Allow",
         "Principal": {
-          "Service": "eks.amazonaws.com"
+          "Service": [ "ec2.amazonaws.com", "eks.amazonaws.com" ]
         },
         "Action": "sts:AssumeRole"
-      },
-      {
-        "Effect": "Allow",
-        "Action": [
-          "ec2:DescribeInstances",
-          "ec2:DescribeRegions",
-          "ec2:DescribeSecurityGroups",
-          "ec2:DescribeSubnets",
-          "ec2:DescribeVolumes",
-          "ec2:CreateSecurityGroup",
-          "ec2:CreateTags",
-          "ec2:CreateVolume",
-          "ec2:DeleteTags",
-          "ec2:ModifyInstanceAttribute",
-          "ec2:ModifyVolume",
-          "ec2:AttachVolume",
-          "ec2:AuthorizeSecurityGroupIngress",
-          "ec2:AuthorizeSecurityGroupEgress",
-          "ec2:DetachVolume",
-          "ec2:DeleteVolume",
-          "eks:CreateCluster",
-          "eks:DeleteCluster",
-          "eks:DescribeCluster",
-          "eks:ListClusters",
-          "eks:UpdateClusterConfig",
-          "eks:UpdateClusterVersion",
-          "eks:ListNodegroups",
-          "eks:DescribeNodegroup",
-          "eks:CreateNodegroup",
-          "eks:UpdateNodegroupConfig",
-          "eks:DeleteNodegroup"
-        ],
-        "Resource": "*"
       }
     ]
   })
 }
+
 
 # Attach IAM policies to the EKS cluster role
 resource "aws_iam_role_policy_attachment" "eks_cluster_policy_attachment" {
